@@ -2,7 +2,9 @@
 
 # dependencies
 /node_modules
+/.next
 /.pnp
+/.env.local
 .pnp.*
 .yarn/*
 !.yarn/patches
