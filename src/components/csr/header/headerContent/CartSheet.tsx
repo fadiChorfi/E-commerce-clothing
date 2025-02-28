@@ -1,124 +1,102 @@
 "use client";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Card } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useCart } from "@/Providers/CartProvider";
-import { useBuy } from "@/Providers/checkoutProvider";
+import { Button } from "@/components/ui/button";
+import EmptyCartView from "./cartsheetContent/EmptyCartView";
+import CheckoutForm from "./cartsheetContent/CheckoutForm";
+import OrderSummary from "./cartsheetContent/orderSummary";
+import CartItemsList from "./cartsheetContent/CartItemsList";
+
+
 
 const CartSheet = () => {
-  const { cart, removeFromCart } = useCart();
-  const {addToBuyItems} = useBuy();
+  const { cart, clearCart } = useCart();
   const router = useRouter();
+  const [showCheckout, setShowCheckout] = useState(false);
 
-  const handleaddToBuyItems = () => {
-    const buyItems = cart.map((item) => ({
-      product: item.product,
-      quantity: item.quantity,
-      variant: item.variant_id,
-    }));
-  
-    addToBuyItems(buyItems); 
-    router.push("/protected/checkOut");
+  const handleCheckoutCart = () => {
+    setShowCheckout(true);
   };
-  
+
+  const handleSubmitOrder = (data: any) => {
+    console.log("Order submitted with shipping details:", data);
+    console.log("Cart items:", cart);
+    
+    alert("Order placed successfully!");
+    clearCart();
+    setShowCheckout(false);
+    router.push("/");
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => {
+      const itemPrice = Number(item.product.base_price);
+      const itemQuantity = item.quantity || 1; 
+      return total + (itemPrice * itemQuantity);
+    }, 0).toFixed(2);
+  };
 
   return (
     <Sheet>
-      <SheetTrigger className="p-2 hover:bg-gray-100 rounded-full relative">
-        <ShoppingCart className="w-5 h-5" />
+      <SheetTrigger className="relative rounded-full p-2 transition-colors hover:bg-gray-100">
+        <ShoppingCart className="h-5 w-5" />
         {cart.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white">
             {cart.length}
           </span>
         )}
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader className="space-y-4 pb-4 border-b">
+      <SheetContent className="flex h-full flex-col overflow-hidden p-0 sm:max-w-md">
+        <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>Your cart ({cart.length})</SheetTitle>
           <SheetDescription>View and manage your cart items.</SheetDescription>
         </SheetHeader>
 
-        {cart.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <ShoppingCart className="w-12 h-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Your cart is empty</h3>
-            <p className="text-sm text-gray-500">Find something you like and add it to your cart.</p>
-          </div>
-        ) : (
-          <div className="mt-4 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-            {cart.map((product, index) => (
-              <Card key={product.product.id ?? `cart-item-${index}`} className="group overflow-hidden">
-                <div className="flex gap-4 p-4">
-                  <div className="relative w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                    <Image
-                      src={product.product.image}
-                      alt={product.product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between gap-2">
-                      <div>
-                        <Link href={`/products/${product.product.id}`} passHref>
-                          <h3 className="font-medium text-sm line-clamp-2 cursor-pointer">
-                            {product.product.name}
-                          </h3>
-                        </Link>
-                        <p className="text-xs text-gray-500 mt-1">{product.product.category}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-2">
-                      <p className="font-semibold text-sm">${product.product.base_price}</p>
-                    </div>
-
-                    <div className="mt-3 flex gap-2">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="flex-1 h-8"
-                        onClick={() => removeFromCart(product.product.id)}
-                      >
-                        Remove
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 h-8"
-                        onClick={() =>
-                          router.push(
-                            `/checkout?productId=${product.product.id}&name=${encodeURIComponent(
-                              product.product.name
-                            )}&price=${product.product.base_price}`
-                          )
-                        }
-                      >
-                        Buy Now
-                      </Button>
-                    </div>
-                  </div>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {cart.length === 0 ? (
+            <EmptyCartView />
+          ) : showCheckout ? (
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Checkout Information</h3>
+              <CheckoutForm 
+                onSubmit={handleSubmitOrder} 
+                onBack={() => setShowCheckout(false)} 
+              />
+              <OrderSummary 
+                cartItems={cart} 
+                calculateTotal={calculateTotal} 
+              />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <CartItemsList cartItems={cart} />
+              
+              <div className="border-t py-4">
+                <div className="mb-2 flex justify-between">
+                  <span className="font-medium">Subtotal:</span>
+                  <span>${calculateTotal()}</span>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
+              </div>
+            </div>
+          )}
+        </div>
 
-        {cart.length > 0 && (
-          <div className="mt-6 pt-4 border-t">
-            <Button className="w-full"  onClick={handleaddToBuyItems} >
+        {cart.length > 0 && !showCheckout && (
+          <div className="border-t px-6 py-4">
+            <Button
+              className="w-full"
+              onClick={handleCheckoutCart}
+            >
               Check out
             </Button>
           </div>

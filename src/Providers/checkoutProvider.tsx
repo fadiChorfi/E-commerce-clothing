@@ -1,11 +1,11 @@
 "use client";
-import { BuyItem, Product, ProductVariant } from "@/types/types";
+import { BuyItem } from "@/types/types";
 import { createContext, useContext, useState } from "react";
 
 type BuyContextType = {
   buyItems: BuyItem[];
   setBuyItems: (items: BuyItem[]) => void;
-  addToBuyItems: (item: BuyItem[]) => void;
+  addToBuyItems: (item: BuyItem) => void;
   removeFromBuyItems: (id: string) => void;
 };
 

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./SupabaseProvider";
 import supabase from "@/supabase/client";
 import { CartItem, Product } from "@/types/types";
+import { useRouter } from "next/navigation";
 
 type CartContextType = {
   cart: CartItem[];
@@ -11,6 +12,7 @@ type CartContextType = {
   fetchCart: () => Promise<{ success: boolean; data?: CartItem[]; error?: any }>;
   removeFromCart: (itemID: string) => Promise<{ success: boolean; error?: any }>;
   isInCart: (productId: string) => boolean;
+  clearCart: ()=>Promise<{success: boolean; error?: any}>
 };
 
 const CartContext = createContext<CartContextType>({
@@ -19,6 +21,7 @@ const CartContext = createContext<CartContextType>({
   fetchCart: async () => ({ success: false, error: null }),
   removeFromCart: async () => ({ success: false, error: null }),
   isInCart: () => false,
+  clearCart: async () => ({ success: false, error: null }),
 });
 
 export const CartContextProvider = ({ children }: { children: React.ReactNode }) => {
@@ -35,6 +38,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
 
   const addToCart = async (item: CartItem) => {
     if (!session?.user?.id) {
+      alert('sign in first');
       return { success: false, error: "User is not logged in." };
     }
 
@@ -49,6 +53,8 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
         user_id: session.user.id,
         product_id: item.product.id,
         variant_id: item.variant_id,
+        selectedColor: item.selectedColor,
+        selectedSize: item.selectedSize,
         quantity: item.quantity,
       });
 
@@ -72,7 +78,30 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
   };
 
   
-
+  const clearCart = async () => {
+    if (!session?.user?.id) {
+      return { success: false, error: "User is not logged in." };
+    }
+  
+    try {
+      const { error } = await supabase
+        .from("cart_items")
+        .delete()
+        .eq("user_id", session.user.id);
+  
+      if (error) {
+        console.error("Error clearing cart:", error);
+        return { success: false, error };
+      }
+  
+      setCart([]); // Clear the local cart state after successful deletion
+      return { success: true };
+    } catch (err) {
+      console.error("Unexpected error clearing cart:", err);
+      return { success: false, error: (err as Error).message };
+    }
+  };
+  
   const fetchCart = async () => {
     if (!session?.user?.id) {
       return { success: false, error: "User is not logged in." };
@@ -93,6 +122,8 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
         user_id: item.user_id,
         product: item.product as Product,
         variant_id: item.product_variant_id,
+        selectedColor: item.selectedColor,
+        selectedSize: item.selectedSize,
         quantity: item.quantity,
       }));
 
@@ -140,6 +171,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
     fetchCart,
     removeFromCart,
     isInCart,
+    clearCart,
   };
 
   return <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>;

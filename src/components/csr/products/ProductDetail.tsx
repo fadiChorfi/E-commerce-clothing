@@ -16,6 +16,7 @@ import {
 import { useBuy } from "@/Providers/checkoutProvider";
 import Image from "next/image";
 import { useAuth } from "@/Providers/SupabaseProvider";
+import { toast } from "sonner";
 
 type Props = {
   product: Product;
@@ -61,7 +62,6 @@ const ProductDetail = ({ product }: Props) => {
 
       setAvailableSizes([...new Set(sizesForColor)]);
 
-      // If current size is not available for this color, clear it
       if (selectedSize && !sizesForColor.includes(selectedSize)) {
         setSelectedSize("");
       }
@@ -76,6 +76,13 @@ const ProductDetail = ({ product }: Props) => {
   }, []);
 
   const handleAddToCart = () => {
+    if (!session?.user?.id) {
+      alert('you are not logged')
+      setTimeout(()=>{
+        router.push("/auth");
+      },3000)
+      return { success: false, error: "User is not logged in." };
+    }
     const selectedVariant = variants.find(
       (variant) => variant.color === selectedColor && variant.size === selectedSize
     );
@@ -86,12 +93,17 @@ const ProductDetail = ({ product }: Props) => {
     }
   
     addToCart({
-      
-      user_id: session.user.id, //
+      user_id: session.user.id, 
       product: product,
-      variant_id: selectedVariant.id, // Use the variant ID instead
-      quantity: 1,
+      variant_id: selectedVariant.id,
+      selectedColor: selectedColor,
+      selectedSize: selectedSize,
+      quantity: counter,
     });
+    console.log(product)
+    console.log(selectedVariant.id)
+    console.log(counter)
+
   };
 
   const handleAddQuantity = () => {
@@ -106,6 +118,13 @@ const ProductDetail = ({ product }: Props) => {
   };
 
   const handlebuyBtn = () => {
+    if (!session?.user?.id) {
+      alert('you are not logged')
+      setTimeout(()=>{
+        router.push("/auth");
+      },2000)
+      return { success: false, error: "User is not logged in." };
+    }
     const selectedVariant = variants.find(
       (variant) =>
         variant.color === selectedColor && variant.size === selectedSize

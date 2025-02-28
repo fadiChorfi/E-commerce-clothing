@@ -1,8 +1,11 @@
+"use client";
 import React, { useState } from "react";
 import { Heart, Loader2 } from "lucide-react";
 import { useWishlist } from "@/Providers/wishlistProvider";
 import { Product } from "@/types/types";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/Providers/SupabaseProvider";
+import { useRouter } from "next/navigation";
 
 interface WishlistButtonProps {
   product: Product;
@@ -11,12 +14,21 @@ interface WishlistButtonProps {
 const WishlistButton = ({ product }: WishlistButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { addToWishlist, removeFromWishlist, isProductLiked } = useWishlist();
-
+  const { session } = useAuth();
+  const router = useRouter();
   const isLiked = isProductLiked(product.id);
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (!session?.user?.id) {
+      alert("you are not logged");
+      setTimeout(() => {
+        router.push("/auth");
+      }, 3000);
+      return { success: false, error: "User is not logged in." };
+    }
 
     try {
       if (isLiked) {

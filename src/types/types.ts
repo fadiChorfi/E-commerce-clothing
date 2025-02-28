@@ -64,7 +64,9 @@ export interface OrderItem {
 export interface CartItem {
   user_id: string;
   product: Product;
-  variant_id: ProductVariant;
+  variant_id: string | number;
+  selectedColor: String;
+  selectedSize: string;
   quantity: number;
   
 }
@@ -92,5 +94,18 @@ export interface Review {
 export interface BuyItem {
   product: Product;
   quantity: number;
-  variant: number;
+  variant: ProductVariant;
 };
+
+
+export type MultiBuyItem = {
+  product_id: string ;
+  variant_id: string;
+  quantity: number;
+}[];
+
+
+
+
+
+

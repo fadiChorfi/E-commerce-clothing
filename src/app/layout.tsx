@@ -33,13 +33,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthContextProvider>
-          <BuyProvider>
-            <CartContextProvider>
-              <WishlistContextProvider>
-                <OrderContextProvider>{children}</OrderContextProvider>
-              </WishlistContextProvider>
-            </CartContextProvider>
-          </BuyProvider>
+          
+            <BuyProvider>
+              <CartContextProvider>
+                <WishlistContextProvider>
+                  <OrderContextProvider>{children}</OrderContextProvider>
+                </WishlistContextProvider>
+              </CartContextProvider>
+            </BuyProvider>
         </AuthContextProvider>
       </body>
     </html>
