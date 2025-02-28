@@ -1,3 +1,4 @@
+//app/page.tsx
 import ClientWrapper from "@/components/csr/products/ClientWrapper";
 import supabase from "@/supabase/client";
 

@@ -62,15 +62,11 @@ export interface OrderItem {
 }
 
 export interface CartItem {
-  id: string;
   user_id: string;
-  product_variant_id: string;
+  product: Product;
+  variant_id: ProductVariant;
   quantity: number;
-  created_at: string;
-  updated_at: string;
-  variant?: ProductVariant & {
-    product: Product;
-  };
+  
 }
 
 export interface WishlistItem {
@@ -91,3 +87,10 @@ export interface Review {
   updated_at: string;
   profile?: Profile;
 }
+
+
+export interface BuyItem {
+  product: Product;
+  quantity: number;
+  variant: number;
+};

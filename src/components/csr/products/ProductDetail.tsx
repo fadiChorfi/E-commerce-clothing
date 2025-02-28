@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Product, ProductVariant } from "@/types/types";
 import Header from "../header/Header";
@@ -13,26 +13,85 @@ import {
   CreditCard,
   Package,
 } from "lucide-react";
-import { useOrder } from "@/Providers/orderProvider";
 import { useBuy } from "@/Providers/checkoutProvider";
+import Image from "next/image";
+import { useAuth } from "@/Providers/SupabaseProvider";
 
 type Props = {
   product: Product;
 };
 
 const ProductDetail = ({ product }: Props) => {
-  const [counter, setCounter] = useState<number>(0);
+  const [counter, setCounter] = useState<number>(1);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("");
+  const [availableColors, setAvailableColors] = useState<string[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const router = useRouter();
   const { addToCart } = useCart();
-  const { setBuyItem } = useBuy();
+  const { addToBuyItems } = useBuy();
+  const { session } = useAuth();
 
-  const { createOrder } = useOrder();
+  const variants: ProductVariant[] = product.product_variants || [];
+  const allColors = [...new Set(variants.map((variant) => variant.color))];
+  const allSizes = [...new Set(variants.map((variant) => variant.size))];
+
+  useEffect(() => {
+    if (selectedSize) {
+      const colorsForSize = variants
+        .filter((variant) => variant.size === selectedSize)
+        .map((variant) => variant.color);
+
+      setAvailableColors([...new Set(colorsForSize)]);
+
+      if (selectedColor && !colorsForSize.includes(selectedColor)) {
+        setSelectedColor("");
+      }
+    } else {
+      setAvailableColors(allColors);
+    }
+  }, [selectedSize, variants]);
+
+  useEffect(() => {
+    if (selectedColor) {
+      const sizesForColor = variants
+        .filter((variant) => variant.color === selectedColor)
+        .map((variant) => variant.size);
+
+      setAvailableSizes([...new Set(sizesForColor)]);
+
+      // If current size is not available for this color, clear it
+      if (selectedSize && !sizesForColor.includes(selectedSize)) {
+        setSelectedSize("");
+      }
+    } else {
+      setAvailableSizes(allSizes);
+    }
+  }, [selectedColor, variants]);
+
+  useEffect(() => {
+    setAvailableColors(allColors);
+    setAvailableSizes(allSizes);
+  }, []);
 
   const handleAddToCart = () => {
-    addToCart(product);
+    const selectedVariant = variants.find(
+      (variant) => variant.color === selectedColor && variant.size === selectedSize
+    );
+  
+    if (!selectedVariant) {
+      alert("Please select a valid color and size.");
+      return;
+    }
+  
+    addToCart({
+      
+      user_id: session.user.id, //
+      product: product,
+      variant_id: selectedVariant.id, // Use the variant ID instead
+      quantity: 1,
+    });
   };
 
   const handleAddQuantity = () => {
@@ -40,26 +99,38 @@ const ProductDetail = ({ product }: Props) => {
   };
 
   const handleMinQuantity = () => {
-    if (counter == 0) {
+    if (counter <= 1) {
       return;
     }
     setCounter(counter - 1);
   };
 
   const handlebuyBtn = () => {
-   /*  setBuyItem({
-      productId: product.id,
+    const selectedVariant = variants.find(
+      (variant) =>
+        variant.color === selectedColor && variant.size === selectedSize
+    );
+
+    if (!selectedVariant) {
+      alert("Please select a valid color and size.");
+      return;
+    }
+
+    addToBuyItems({
+      product: product,
       quantity: counter,
-      selectedColor,
-      selectedSize,
-    }); */
+      variant: selectedVariant,
+    });
 
     router.push("/protected/checkOut");
   };
 
-  const variants: ProductVariant[] = product.product_variants || [];
-  const colors = [...new Set(variants.map((variant) => variant.color))];
-  const sizes = [...new Set(variants.map((variant) => variant.size))];
+  const isValidSelection = () => {
+    return variants.some(
+      (variant) =>
+        variant.color === selectedColor && variant.size === selectedSize
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -79,9 +150,10 @@ const ProductDetail = ({ product }: Props) => {
           <div className="space-y-4 sm:space-y-6 order-1">
             <div className="bg-white rounded-xl shadow-md overflow-hidden p-2 max-w-lg mx-auto">
               <div className="relative aspect-square overflow-hidden rounded-lg">
-                <img
+                <Image
                   alt={product.name}
                   src={product.image}
+                  width={100}                  height={100}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                 />
               </div>
@@ -148,43 +220,6 @@ const ProductDetail = ({ product }: Props) => {
 
             <div className="space-y-2 sm:space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-medium text-gray-800">Color</h3>
-                {selectedColor && (
-                  <span className="text-xs sm:text-sm text-gray-500">
-                    Selected: {selectedColor}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2 sm:gap-3">
-                {colors.length > 0 ? (
-                  colors.map((color, index) => (
-                    <button
-                      key={index}
-                      className={`
-                        px-3 py-1.5 sm:px-5 sm:py-2.5 text-sm rounded-lg transition-all duration-200
-                        ${
-                          selectedColor === color
-                            ? "bg-blue-700 text-white shadow-md border-transparent"
-                            : "border border-gray-300 hover:border-blue-500 hover:bg-gray-50"
-                        }
-                      `}
-                      onClick={() => {
-                        setSelectedColor(color);
-                      }}
-                    >
-                      {color}
-                    </button>
-                  ))
-                ) : (
-                  <p className="text-gray-500 italic text-sm">
-                    No colors available
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex items-center justify-between">
                 <h3 className="font-medium text-gray-800">Size</h3>
                 {selectedSize && (
                   <span className="text-xs sm:text-sm text-gray-500">
@@ -193,28 +228,81 @@ const ProductDetail = ({ product }: Props) => {
                 )}
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">
-                {sizes.length > 0 ? (
-                  sizes.map((size, index) => (
-                    <button
-                      key={index}
-                      className={`
-                        w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-lg text-sm transition-all duration-200
-                        ${
-                          selectedSize === size
-                            ? "bg-blue-700 text-white shadow-md border-transparent"
-                            : "border border-gray-300 hover:border-blue-500 hover:bg-gray-50"
-                        }
-                      `}
-                      onClick={() => {
-                        setSelectedSize(size);
-                      }}
-                    >
-                      {size}
-                    </button>
-                  ))
+                {allSizes.length > 0 ? (
+                  allSizes.map((size, index) => {
+                    const isAvailable = availableSizes.includes(size);
+                    return (
+                      <button
+                        key={index}
+                        className={`
+                          w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-lg text-sm transition-all duration-200
+                          ${
+                            selectedSize === size
+                              ? "bg-blue-700 text-white shadow-md border-transparent"
+                              : isAvailable
+                              ? "border border-gray-300 hover:border-blue-500 hover:bg-gray-50"
+                              : "border border-gray-200 text-gray-400 cursor-not-allowed bg-gray-100"
+                          }
+                        `}
+                        onClick={() => {
+                          if (isAvailable) {
+                            setSelectedSize(size);
+                          }
+                        }}
+                        disabled={!isAvailable}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })
                 ) : (
                   <p className="text-gray-500 italic text-sm">
                     No sizes available
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2 sm:space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-800">Color</h3>
+                {selectedColor && (
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    Selected: {selectedColor}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                {allColors.length > 0 ? (
+                  allColors.map((color, index) => {
+                    const isAvailable = availableColors.includes(color);
+                    return (
+                      <button
+                        key={index}
+                        className={`
+                          px-3 py-1.5 sm:px-5 sm:py-2.5 text-sm rounded-lg transition-all duration-200
+                          ${
+                            selectedColor === color
+                              ? "bg-blue-700 text-white shadow-md border-transparent"
+                              : isAvailable
+                              ? "border border-gray-300 hover:border-blue-500 hover:bg-gray-50"
+                              : "border border-gray-200 text-gray-400 cursor-not-allowed bg-gray-100"
+                          }
+                        `}
+                        onClick={() => {
+                          if (isAvailable) {
+                            setSelectedColor(color);
+                          }
+                        }}
+                        disabled={!isAvailable}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-500 italic text-sm">
+                    No colors available
                   </p>
                 )}
               </div>
@@ -226,8 +314,13 @@ const ProductDetail = ({ product }: Props) => {
                 <button
                   onClick={handleMinQuantity}
                   className="p-2 sm:p-3 text-gray-600 hover:bg-gray-200 transition"
+                  disabled={counter <= 1}
                 >
-                  <MinusCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <MinusCircle
+                    className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                      counter <= 1 ? "text-gray-400" : ""
+                    }`}
+                  />
                 </button>
                 <span className="w-10 sm:w-12 text-center text-lg sm:text-xl font-medium">
                   {counter}
@@ -248,6 +341,11 @@ const ProductDetail = ({ product }: Props) => {
                 <button className="w-full bg-gray-400 text-white py-3 sm:py-4 rounded-lg cursor-not-allowed font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
                   <Package className="h-4 w-4 sm:h-5 sm:w-5" />
                   Out of Stock
+                </button>
+              ) : !isValidSelection() ? (
+                <button className="w-full bg-gray-400 text-white py-3 sm:py-4 rounded-lg cursor-not-allowed font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Please Select Size and Color
                 </button>
               ) : (
                 <>

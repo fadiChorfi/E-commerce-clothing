@@ -3,12 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./SupabaseProvider";
 import supabase from "@/supabase/client";
-import { Product } from "@/types/types";
+import { CartItem, Product } from "@/types/types";
 
 type CartContextType = {
-  cart: Product[];
-  addToCart: (item: Product) => Promise<{ success: boolean; error?: any }>;
-  fetchCart: () => Promise<{ success: boolean; data?: Product[]; error?: any }>;
+  cart: CartItem[];
+  addToCart: (item: CartItem) => Promise<{ success: boolean; error?: any }>;
+  fetchCart: () => Promise<{ success: boolean; data?: CartItem[]; error?: any }>;
   removeFromCart: (itemID: string) => Promise<{ success: boolean; error?: any }>;
   isInCart: (productId: string) => boolean;
 };
@@ -23,7 +23,7 @@ const CartContext = createContext<CartContextType>({
 
 export const CartContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
-  const [cart, setCart] = useState<Product[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -33,12 +33,12 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
     }
   }, [session]);
 
-  const addToCart = async (item: Product) => {
+  const addToCart = async (item: CartItem) => {
     if (!session?.user?.id) {
       return { success: false, error: "User is not logged in." };
     }
 
-    if (isInCart(item.id)) {
+    if (isInCart(item.product.id)) {
       return { success: false, error: "Item already in cart" };
     }
 
@@ -47,23 +47,31 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
     try {
       const { error } = await supabase.from("cart_items").insert({
         user_id: session.user.id,
-        product_id: item.id,
-      
+        product_id: item.product.id,
+        variant_id: item.variant_id,
+        quantity: item.quantity,
       });
 
+
+
+
+      console.log("ffffffffffff")
+
       if (error) {
-        setCart((prevCart) => prevCart.filter((p) => p.id !== item.id));
+        setCart((prevCart) => prevCart.filter((p) => p.product.id !== item.product.id));
         console.error("Error adding to cart:", error);
         return { success: false, error: error.message };
       }
-
+      console.log('cartowwwwwww: ', cart)
       return { success: true };
     } catch (err) {
-      setCart((prevCart) => prevCart.filter((p) => p.id !== item.id));
+      setCart((prevCart) => prevCart.filter((p) => p.product.id !== item.product.id));
       console.error("Unexpected error adding to cart:", err);
       return { success: false, error: (err as Error).message };
     }
   };
+
+  
 
   const fetchCart = async () => {
     if (!session?.user?.id) {
@@ -73,7 +81,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
     try {
       const { data, error } = await supabase
         .from("cart_items")
-        .select("products(*)")  
+        .select("*, product:products(*), variant:product_variants(*)")
         .eq("user_id", session.user.id);
 
       if (error) {
@@ -81,7 +89,13 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
         return { success: false, error };
       }
 
-      const formattedData = data.map((item: any) => item.products);
+      const formattedData: CartItem[] = data.map((item: any) => ({
+        user_id: item.user_id,
+        product: item.product as Product,
+        variant_id: item.product_variant_id,
+        quantity: item.quantity,
+      }));
+
       setCart(formattedData);
       return { success: true, data: formattedData };
     } catch (err) {
@@ -95,7 +109,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
       return { success: false, error: "User is not logged in." };
     }
 
-    setCart((prevCart) => prevCart.filter((p) => p.id !== itemID));
+    setCart((prevCart) => prevCart.filter((p) => p.product.id !== itemID));
 
     try {
       const { error } = await supabase
@@ -117,7 +131,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
   };
 
   const isInCart = (productId: string) => {
-    return cart.some((item) => item.id === productId);
+    return cart.some((item) => item.product.id === productId);
   };
 
   const contextValue: CartContextType = {

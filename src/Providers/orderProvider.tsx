@@ -38,7 +38,7 @@ export const OrderContextProvider = ({ children }: { children: ReactNode }) => {
 
   const createOrder = async (
     userId: string,
-    items: Omit<OrderItem, "order_id">[], // Remove order_id since it's created later
+    items: Omit<OrderItem, "order_id">[], // Remove order_id since it's created late
     shippingAddress: Record<string, any>
   ): Promise<Order | null> => {
     try {

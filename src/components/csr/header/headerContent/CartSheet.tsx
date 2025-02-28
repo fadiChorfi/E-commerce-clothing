@@ -14,10 +14,24 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/Providers/CartProvider";
+import { useBuy } from "@/Providers/checkoutProvider";
 
 const CartSheet = () => {
   const { cart, removeFromCart } = useCart();
+  const {addToBuyItems} = useBuy();
   const router = useRouter();
+
+  const handleaddToBuyItems = () => {
+    const buyItems = cart.map((item) => ({
+      product: item.product,
+      quantity: item.quantity,
+      variant: item.variant_id,
+    }));
+  
+    addToBuyItems(buyItems); 
+    router.push("/protected/checkOut");
+  };
+  
 
   return (
     <Sheet>
@@ -44,12 +58,12 @@ const CartSheet = () => {
         ) : (
           <div className="mt-4 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
             {cart.map((product, index) => (
-              <Card key={product.id ?? `cart-item-${index}`} className="group overflow-hidden">
+              <Card key={product.product.id ?? `cart-item-${index}`} className="group overflow-hidden">
                 <div className="flex gap-4 p-4">
                   <div className="relative w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                     <Image
-                      src={product.image}
-                      alt={product.name}
+                      src={product.product.image}
+                      alt={product.product.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -58,17 +72,17 @@ const CartSheet = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between gap-2">
                       <div>
-                        <Link href={`/products/${product.id}`} passHref>
+                        <Link href={`/products/${product.product.id}`} passHref>
                           <h3 className="font-medium text-sm line-clamp-2 cursor-pointer">
-                            {product.name}
+                            {product.product.name}
                           </h3>
                         </Link>
-                        <p className="text-xs text-gray-500 mt-1">{product.category}</p>
+                        <p className="text-xs text-gray-500 mt-1">{product.product.category}</p>
                       </div>
                     </div>
 
                     <div className="mt-2">
-                      <p className="font-semibold text-sm">${product.base_price}</p>
+                      <p className="font-semibold text-sm">${product.product.base_price}</p>
                     </div>
 
                     <div className="mt-3 flex gap-2">
@@ -76,7 +90,7 @@ const CartSheet = () => {
                         variant="default"
                         size="sm"
                         className="flex-1 h-8"
-                        onClick={() => removeFromCart(product.id)}
+                        onClick={() => removeFromCart(product.product.id)}
                       >
                         Remove
                       </Button>
@@ -86,9 +100,9 @@ const CartSheet = () => {
                         className="flex-1 h-8"
                         onClick={() =>
                           router.push(
-                            `/checkout?productId=${product.id}&name=${encodeURIComponent(
-                              product.name
-                            )}&price=${product.base_price}`
+                            `/checkout?productId=${product.product.id}&name=${encodeURIComponent(
+                              product.product.name
+                            )}&price=${product.product.base_price}`
                           )
                         }
                       >
@@ -104,8 +118,8 @@ const CartSheet = () => {
 
         {cart.length > 0 && (
           <div className="mt-6 pt-4 border-t">
-            <Button className="w-full">
-              <Link href="/protected/order"> chekout </Link>
+            <Button className="w-full"  onClick={handleaddToBuyItems} >
+              Check out
             </Button>
           </div>
         )}
