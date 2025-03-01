@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/Providers/SupabaseProvider";
 
 const ProfileBtn = () => {
-  const { session, signOut } = useAuth();
+  const { session, signOut , user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -54,7 +54,7 @@ const ProfileBtn = () => {
                 </div>
                 <div>
                   <h2 className="font-medium">
-                    {session.user.email || "User"}
+                    {user?.user_metadata.full_name}
                   </h2>
                   <p className="text-sm text-gray-500">Welcome back!</p>
                 </div>
