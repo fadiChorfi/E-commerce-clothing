@@ -54,7 +54,7 @@ const ProfileBtn = () => {
                 </div>
                 <div>
                   <h2 className="font-medium">
-                    {user?.user_metadata.full_name}
+                    {user?.user_metadata.full_name || session.user.email}
                   </h2>
                   <p className="text-sm text-gray-500">Welcome back!</p>
                 </div>

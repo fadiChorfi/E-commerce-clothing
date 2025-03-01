@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 const AboutUs = () => {
@@ -10,7 +9,7 @@ const AboutUs = () => {
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">About Our Company</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          We're dedicated to providing exceptional products and services that transform the way you live and work.
+          We &apos; re dedicated to providing exceptional products and services that transform the way you live and work.
         </p>
       </div>
 
@@ -30,10 +29,10 @@ const AboutUs = () => {
         <div className="w-full lg:w-1/2">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
           <p className="text-gray-600 mb-4">
-            Founded in 2010, our company began with a simple mission: to create innovative solutions that make a real difference in people's lives. What started as a small team of passionate individuals has grown into a thriving organization with a global presence.
+            Founded in 2010, our company began with a simple mission: to create innovative solutions that make a real difference in people&apos;s lives. What started as a small team of passionate individuals has grown into a thriving organization with a global presence.
           </p>
           <p className="text-gray-600 mb-4">
-            Through years of dedication and hard work, we've established ourselves as leaders in our industry, known for our commitment to quality, customer satisfaction, and sustainable business practices.
+            Through years of dedication and hard work, we&apos;ve established ourselves as leaders in our industry, known for our commitment to quality, customer satisfaction, and sustainable business practices.
           </p>
           <p className="text-gray-600">
             Today, we continue to push boundaries and explore new opportunities, always staying true to our core values and the vision that inspired us from the beginning.
