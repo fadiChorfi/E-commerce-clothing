@@ -1,14 +1,15 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 import supabase from "@/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react"; // Ensure you're handling authentication properly
+import Image from "next/image";
 
 interface Order {
   id: string;
   status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
   total_amount: number;
   created_at: string;
-  shipping_address: Record<string, any>;
+  shipping_address: Record<string, string[]>;
 }
 
 interface OrderItem {
@@ -24,7 +25,9 @@ interface OrderItem {
 const OrdersPage = () => {
   const user = useUser(); // Get current authenticated user
   const [orders, setOrders] = useState<Order[]>([]);
-  const [orderItems, setOrderItems] = useState<{ [key: string]: OrderItem[] }>({});
+  const [orderItems, setOrderItems] = useState<{ [key: string]: OrderItem[] }>(
+    {}
+  );
 
   useEffect(() => {
     if (user) {
@@ -88,11 +91,17 @@ const OrdersPage = () => {
             <p>Status: {order.status}</p>
             <p>Total Amount: ${order.total_amount.toFixed(2)}</p>
             <p>Ordered on: {new Date(order.created_at).toLocaleDateString()}</p>
-            
+
             <h3 className="mt-2 font-semibold">Items:</h3>
             {orderItems[order.id]?.map((item) => (
               <div key={item.id} className="flex gap-4 my-2">
-                <img src={item.product_image} alt={item.product_name} width={50} height={50} />
+                <Image
+                  src={item.product_image || "/placeholder.svg"}
+                  alt={item.product_name || "Product image"}
+                  width={50}
+                  height={50}
+                />
+
                 <div>
                   <p>{item.product_name}</p>
                   <p>Quantity: {item.quantity}</p>

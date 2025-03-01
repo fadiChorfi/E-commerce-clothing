@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/Providers/CartProvider";
+import { CartItem } from "@/types/types";
 
 type CartItemsListProps = {
-  cartItems: any[];
+  cartItems: CartItem[];
 };
 
 const CartItemsList = ({ cartItems }: CartItemsListProps) => {
@@ -15,7 +16,7 @@ const CartItemsList = ({ cartItems }: CartItemsListProps) => {
   return (
     <div className="space-y-3">
       {cartItems.map((item, index) => (
-        <CartItem 
+        <CartItemm 
           key={item.product.id ?? `cart-item-${index}`}
           item={item}
           onRemove={() => removeFromCart(item.product.id)}
@@ -26,11 +27,11 @@ const CartItemsList = ({ cartItems }: CartItemsListProps) => {
 };
 
 type CartItemProps = {
-  item: any;
+  item: CartItem;
   onRemove: () => void;
 };
 
-const CartItem = ({ item, onRemove }: CartItemProps) => {
+const CartItemm = ({ item, onRemove }: CartItemProps) => {
   const { product, selectedColor, selectedSize, quantity = 1 } = item;
   
   return (

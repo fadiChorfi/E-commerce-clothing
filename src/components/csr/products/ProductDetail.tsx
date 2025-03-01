@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Product, ProductVariant } from "@/types/types";
+import { Product } from "@/types/types";
 import Header from "../header/Header";
 import { useCart } from "@/Providers/CartProvider";
 import WishlistButton from "./WishlistButton";
@@ -16,7 +16,6 @@ import {
 import { useBuy } from "@/Providers/checkoutProvider";
 import Image from "next/image";
 import { useAuth } from "@/Providers/SupabaseProvider";
-import { toast } from "sonner";
 
 type Props = {
   product: Product;
@@ -34,9 +33,19 @@ const ProductDetail = ({ product }: Props) => {
   const { addToBuyItems } = useBuy();
   const { session } = useAuth();
 
-  const variants: ProductVariant[] = product.product_variants || [];
-  const allColors = [...new Set(variants.map((variant) => variant.color))];
-  const allSizes = [...new Set(variants.map((variant) => variant.size))];
+  // Wrap variants in useMemo to ensure it's stable across renders
+  const variants = useMemo(() => product.product_variants || [], [product.product_variants]);
+  
+  // Use variants from above in these derived values
+  const allColors = useMemo(() => 
+    [...new Set(variants.map((variant) => variant.color))], 
+    [variants]
+  );
+  
+  const allSizes = useMemo(() => 
+    [...new Set(variants.map((variant) => variant.size))], 
+    [variants]
+  );
 
   useEffect(() => {
     if (selectedSize) {
@@ -52,7 +61,7 @@ const ProductDetail = ({ product }: Props) => {
     } else {
       setAvailableColors(allColors);
     }
-  }, [selectedSize, variants]);
+  }, [selectedSize, variants, allColors, selectedColor]);
 
   useEffect(() => {
     if (selectedColor) {
@@ -68,12 +77,12 @@ const ProductDetail = ({ product }: Props) => {
     } else {
       setAvailableSizes(allSizes);
     }
-  }, [selectedColor, variants]);
+  }, [selectedColor, variants, allSizes, selectedSize]);
 
   useEffect(() => {
     setAvailableColors(allColors);
     setAvailableSizes(allSizes);
-  }, []);
+  }, [allColors, allSizes]);
 
   const handleAddToCart = () => {
     if (!session?.user?.id) {

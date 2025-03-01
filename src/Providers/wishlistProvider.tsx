@@ -1,14 +1,14 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./SupabaseProvider";
 import supabase from "@/supabase/client";
 import { Product } from "@/types/types";
 
 type WishlistContextType = {
   wishlist: Product[];
-  addToWishlist: (item: Product) => Promise<{ success: boolean; error?: any }>;
-  fetchWishlist: () => Promise<{ success: boolean; data?: any; error?: any }>;
-  removeFromWishlist: (productId: string) => Promise<{ success: boolean; error?: any }>;
+  addToWishlist: (item: Product) => Promise<{ success: boolean; error?: unknown }>;
+  fetchWishlist: () => Promise<{ success: boolean; data?: Product[]; error?: unknown }>;
+  removeFromWishlist: (productId: string) => Promise<{ success: boolean; error?: unknown }>;
   isProductLiked: (productId: string) => boolean;
 };
 
@@ -24,11 +24,41 @@ export const WishlistContextProvider = ({ children }: { children: React.ReactNod
   const { session } = useAuth();
   const [wishlist, setWishlist] = useState<Product[]>([]);
 
+  // Memoize fetchWishlist with useCallback
+  const fetchWishlist = useCallback(async () => {
+    if (!session?.user?.id) {
+      return { success: false, error: "User is not logged in." };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("wishlist_items")
+        .select("products(*)")
+        .eq("user_id", session.user.id);
+
+      if (error) {
+        console.error("Error fetching wishlist:", error);
+        return { success: false, error };
+      }
+
+      
+      const formattedData = (data as Array<{ products: Product[] }>).flatMap(item => item.products);
+
+
+      setWishlist(formattedData);
+      return { success: true, data: formattedData };
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      return { success: false, error: err };
+    }
+  }, [session?.user?.id]);
+
+  // Add fetchWishlist to the dependency array
   useEffect(() => {
     if (session?.user?.id) {
       fetchWishlist();
     }
-  }, [session]);
+  }, [session, fetchWishlist]);
 
   const addToWishlist = async (item: Product) => {
     if (!session?.user?.id) {
@@ -45,39 +75,16 @@ export const WishlistContextProvider = ({ children }: { children: React.ReactNod
       });
 
       if (error) {
-        setWishlist((prev) => prev.filter((p) => p.id !== item.id)); // Rollback
+        // Rollback on error
+        setWishlist((prev) => prev.filter((p) => p.id !== item.id));
         return { success: false, error: error.message };
       }
 
       return { success: true };
     } catch (err) {
+      // Rollback on unexpected error
       setWishlist((prev) => prev.filter((p) => p.id !== item.id));
       return { success: false, error: (err as Error).message };
-    }
-  };
-
-  const fetchWishlist = async () => {
-    if (!session?.user?.id) {
-      return { success: false, error: "User is not logged in." };
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("wishlist_items")
-        .select("products(*)")
-        .eq("user_id", session.user.id);
-
-      if (error) {
-        console.error("Error fetching wishlist:", error);
-        return { success: false, error };
-      }
-
-      const formattedData = data.map((item: any) => item.products);
-      setWishlist(formattedData);
-      return { success: true, data: formattedData };
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      return { success: false, error: err };
     }
   };
 
@@ -86,6 +93,7 @@ export const WishlistContextProvider = ({ children }: { children: React.ReactNod
       return { success: false, error: "User is not logged in." };
     }
 
+    // Optimistically update wishlist
     setWishlist((prev) => prev.filter((p) => p.id !== productId));
 
     try {
@@ -107,7 +115,6 @@ export const WishlistContextProvider = ({ children }: { children: React.ReactNod
     }
   };
 
-  // Check if a specific product is liked
   const isProductLiked = (productId: string) => {
     return wishlist.some((item) => item.id === productId);
   };

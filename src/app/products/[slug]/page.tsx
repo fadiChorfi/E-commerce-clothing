@@ -1,36 +1,25 @@
-
-import { NextPage } from "next";
-
 import supabase from "@/supabase/client";
 import { notFound } from "next/navigation";
 import ProductDetail from "@/components/csr/products/ProductDetail";
-import { Product } from "@/types/types";
 
 
-interface ProductPostPageProps {
-  params: { slug: string | number };
+interface ProductPageProps {
+  params: Promise<{ slug: string }>;
 }
 
-const ProductPostPage: NextPage<ProductPostPageProps> = async ({ params }) => {
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug } = await params;
 
-  const { data: products, error } = await supabase
+  const { data: product, error } = await supabase
     .from("products")
-    .select("*, product_variants(*)");
+    .select("*, product_variants(*)")
+    .eq("id", slug)
+    .single(); 
 
-  if (error || !products) {
-    console.error("Error fetching products:", error);
+  if (error || !product) {
+    console.error("Error fetching product:", error);
     notFound();
   }
 
-  const product = products.find((p: Product) => p.id === params.slug);
-
-  if (!product) {
-    notFound();
-  }
-
-
- 
-  return <ProductDetail product={product}  />;
-};
-
-export default ProductPostPage;
+  return <ProductDetail product={product} />;
+}

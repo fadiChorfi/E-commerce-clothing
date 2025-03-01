@@ -1,4 +1,4 @@
-'use client'
+/* 'use client'
 import { useCart } from '@/Providers/CartProvider'
 import CartItem from './CartItem'
 import EmptyCart from './EmptyCart'
@@ -14,8 +14,8 @@ export default function CartContainer() {
     <div className="space-y-4">
       {cart.map((item) => (
         <CartItem
-          key={item.id}
-          item={item}
+          key={item.product.id}
+          item={item.product}
           onRemove={removeFromCart}
         />
         
@@ -25,3 +25,16 @@ export default function CartContainer() {
 }
 
 
+ */
+
+
+
+import React from 'react'
+
+const CartContainer = () => {
+  return (
+    <div>CartContainer</div>
+  )
+}
+
+export default CartContainer

@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { ALGERIA_WILAYAS, DELIVERY_METHODS } from "./constants";
 
 type CheckoutFormProps = {
-  onSubmit: (data: any) => void;
+  onSubmit: () => void;
   onBack: () => void;
 };
 

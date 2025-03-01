@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -85,7 +85,6 @@ const ProfileBtn = () => {
             </div>
           </div>
         ) : (
-          // Sign-in Prompt for Unauthenticated Users
           <div className="p-6 text-center">
             <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <User2Icon className="w-6 h-6 text-gray-500" />

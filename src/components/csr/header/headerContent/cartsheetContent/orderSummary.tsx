@@ -1,7 +1,9 @@
 "use client";
 
+import { CartItem } from "@/types/types";
+
 type OrderSummaryProps = {
-  cartItems: any[];
+  cartItems: CartItem[];
   calculateTotal: () => string;
 };
 

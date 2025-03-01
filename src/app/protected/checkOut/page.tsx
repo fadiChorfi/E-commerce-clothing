@@ -1,5 +1,6 @@
 "use client";
 import { useBuy } from "@/Providers/checkoutProvider";
+import Image from "next/image";
 import { useState } from "react";
 
 const Checkout = () => {
@@ -22,7 +23,7 @@ const Checkout = () => {
       {buyItems.length > 0 ? (
         buyItems.map((item) => (
           <div key={item.product.id} className="flex items-center space-x-4 border-b py-4">
-            <img src={item.product.image} alt={item.product.name} className="w-16 h-16 object-cover" />
+            <Image src={item.product.image} alt={item.product.name} className="w-16 h-16 object-cover" />
             <div>
               <h3 className="text-lg font-semibold">{item.product.name}</h3>
               <p className="text-gray-600">Quantité: {item.quantity}</p>

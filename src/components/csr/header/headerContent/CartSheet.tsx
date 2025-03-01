@@ -28,10 +28,7 @@ const CartSheet = () => {
     setShowCheckout(true);
   };
 
-  const handleSubmitOrder = (data: any) => {
-    console.log("Order submitted with shipping details:", data);
-    console.log("Cart items:", cart);
-    
+  const handleSubmitOrder = () => {
     alert("Order placed successfully!");
     clearCart();
     setShowCheckout(false);

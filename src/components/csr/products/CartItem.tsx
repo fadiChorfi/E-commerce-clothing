@@ -1,9 +1,10 @@
-'use client'
+/* 'use client'
 import { Product } from '@/types/types'
+import Image from 'next/image';
 
 interface CartItemProps {
   item: Product;
-  onRemove: (id: string) => Promise<{ success: boolean; error?: any }>;
+  onRemove: (id: string) => Promise<{ success: boolean; error?: Error }>;
 }
 
 export default function CartItem({ item, onRemove }: CartItemProps) {
@@ -17,7 +18,7 @@ export default function CartItem({ item, onRemove }: CartItemProps) {
 
   return (
     <div className="flex items-center gap-4 p-4 border rounded-lg">
-      <img
+      <Image
         src={item.image}
         alt={item.name}
         className="w-24 h-24 object-cover rounded"
@@ -40,4 +41,16 @@ export default function CartItem({ item, onRemove }: CartItemProps) {
       </div>
     </div>
   )
+} */
+
+
+
+import React from 'react'
+
+const CartItem = () => {
+  return (
+    <div>CartItem</div>
+  )
 }
+
+export default CartItem

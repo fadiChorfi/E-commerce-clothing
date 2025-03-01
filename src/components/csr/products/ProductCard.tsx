@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Product } from "@/types/types";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import { useWishlist } from "@/Providers/wishlistProvider";
 import WishlistButton from "./WishlistButton";
 
 type Props = {

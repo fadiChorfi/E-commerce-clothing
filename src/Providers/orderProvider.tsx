@@ -2,13 +2,12 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import supabase from "@/supabase/client";
 
-// ✅ Define TypeScript types
 interface Order {
   id: string;
   user_id: string;
   status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
   total_amount: number;
-  shipping_address: Record<string, any>;
+  shipping_address: Record<string, string[]>;
   created_at?: string;
 }
 
@@ -25,21 +24,20 @@ interface OrderContextType {
   createOrder: (
     userId: string,
     items: Omit<OrderItem, "order_id">[],
-    shippingAddress: Record<string, any>
+    shippingAddress: Record<string, string[]>
   ) => Promise<Order | null>;
 }
 
 const OrderContext = createContext<OrderContextType | null>(null);
 
-// ✅ OrderContextProvider with Fixed Implementation
 export const OrderContextProvider = ({ children }: { children: ReactNode }) => {
     
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
 
   const createOrder = async (
     userId: string,
-    items: Omit<OrderItem, "order_id">[], // Remove order_id since it's created late
-    shippingAddress: Record<string, any>
+    items: Omit<OrderItem, "order_id">[], 
+    shippingAddress: Record<string, string[]>
   ): Promise<Order | null> => {
     try {
       const totalAmount = items.reduce(
@@ -47,7 +45,6 @@ export const OrderContextProvider = ({ children }: { children: ReactNode }) => {
         0
       );
 
-      // ✅ Insert order and retrieve its ID
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert([
@@ -63,7 +60,6 @@ export const OrderContextProvider = ({ children }: { children: ReactNode }) => {
 
       if (orderError) throw new Error(orderError.message);
 
-      // ✅ Insert order items with the retrieved order ID
       const orderItems = items.map((item) => ({
         order_id: order.id,
         product_variant_id: item.product_variant_id,
@@ -75,7 +71,7 @@ export const OrderContextProvider = ({ children }: { children: ReactNode }) => {
       if (itemsError) throw new Error(itemsError.message);
 
       setCurrentOrder(order);
-      return order; // ✅ Return order so components can use it
+      return order; 
     } catch (error) {
       console.error("Order creation failed:", error);
       return null;
@@ -89,7 +85,6 @@ export const OrderContextProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ✅ Custom Hook to Use Order Context
 export const useOrder = (): OrderContextType => {
   const context = useContext(OrderContext);
   if (!context) {

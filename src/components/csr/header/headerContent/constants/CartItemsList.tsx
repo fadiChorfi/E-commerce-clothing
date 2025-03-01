@@ -1,106 +1,79 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import { useCart } from "@/Providers/CartProvider";
-import { Card } from "@/components/ui/card";
+import type React from "react";
+import { createContext, useContext, useState } from "react";
 
-type CartItemsListProps = {
-  cartItems: any[];
+interface CartItem {
+  product: {
+    id: string;
+    name: string;
+    image: string;
+    category: string;
+    base_price: string | number;
+  };
+  selectedColor?: string;
+  selectedSize?: string;
+  quantity: number;
+}
+
+interface CartContextProps {
+  cartItems: CartItem[];
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+}
+
+const CartContext = createContext<CartContextProps | undefined>(undefined);
+
+export const CartProvider = ({ children }: { children: React.ReactNode }) => {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const addToCart = (item: CartItem) => {
+    setCartItems((prevItems) => {
+      const existingItemIndex = prevItems.findIndex(
+        (prevItem) =>
+          prevItem.product.id === item.product.id &&
+          prevItem.selectedColor === item.selectedColor &&
+          prevItem.selectedSize === item.selectedSize
+      );
+
+      if (existingItemIndex !== -1) {
+        const newItems = [...prevItems];
+        newItems[existingItemIndex].quantity += item.quantity;
+        return newItems;
+      } else {
+        return [...prevItems, item];
+      }
+    });
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item.product.id !== productId)
+    );
+  };
+
+  const updateQuantity = (productId: string, quantity: number) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.product.id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  const value: CartContextProps = {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+  };
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
-const CartItemsList = ({ cartItems }: CartItemsListProps) => {
-  const { removeFromCart } = useCart();
-
-  return (
-    <div className="space-y-3">
-      {cartItems.map((item, index) => (
-        <CartItem 
-          key={item.product.id ?? `cart-item-${index}`}
-          item={item}
-          onRemove={() => removeFromCart(item.product.id)}
-        />
-      ))}
-    </div>
-  );
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
 };
-
-type CartItemProps = {
-  item: any;
-  onRemove: () => void;
-};
-
-const CartItem = ({ item, onRemove }: CartItemProps) => {
-  const { product, selectedColor, selectedSize, quantity = 1 } = item;
-  
-  return (
-    <Card className="overflow-hidden border bg-white shadow-sm transition-all hover:shadow">
-      <div className="flex p-3 gap-3">
-        <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 hover:scale-105"
-          />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col h-full justify-between">
-            <div>
-              <Link href={`/products/${product.id}`} passHref>
-                <h3 className="font-medium text-sm line-clamp-1 hover:text-blue-600 transition-colors">
-                  {product.name}
-                </h3>
-              </Link>
-              
-              <div className="mt-1 text-xs text-gray-500 space-y-1">
-                <p>{product.category}</p>
-                
-                <div className="flex flex-wrap gap-x-3">
-                  {selectedColor && (
-                    <div className="flex items-center">
-                      <span className="mr-1">Color:</span>
-                      <span>{selectedColor}</span>
-                    </div>
-                  )}
-                  
-                  {selectedSize && (
-                    <div className="flex items-center">
-                      <span className="mr-1">Size:</span>
-                      <span>{selectedSize}</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center">
-                    <span className="mr-1">Qty:</span>
-                    <span>{quantity}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-2 flex justify-between items-center">
-              <p className="font-semibold">
-                ${(Number(product.base_price) * quantity).toFixed(2)}
-              </p>
-              
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 border-gray-200 text-xs"
-                  onClick={onRemove}
-                >
-                  Remove
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
-
-export default CartItemsList;

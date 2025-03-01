@@ -65,7 +65,7 @@ export interface CartItem {
   user_id: string;
   product: Product;
   variant_id: string | number;
-  selectedColor: String;
+  selectedColor: string;
   selectedSize: string;
   quantity: number;
   

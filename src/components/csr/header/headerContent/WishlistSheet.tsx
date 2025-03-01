@@ -20,19 +20,19 @@ const WishlistSheet = () => {
   const { session } = useAuth();
   const { wishlist, fetchWishlist, removeFromWishlist } = useWishlist();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | unknown>(null);
 
   useEffect(() => {
     const loadWishlist = async () => {
       if (!session?.user?.id) return;
       setLoading(true);
-      const { success, data, error } = await fetchWishlist();
+      const { error } = await fetchWishlist();
       setLoading(false);
-      if (!success) {
-        setError(error?.message || "Failed to load wishlist.");
-      }
+       if (error) {
+        setError(error || "Failed to load wishlist.");
+      } 
     };
-
+    
     loadWishlist();
   }, [session]);
 
@@ -66,7 +66,7 @@ const WishlistSheet = () => {
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-8 text-red-500">
-            <p>{error}</p>
+            <p></p>
           </div>
         ) : wishlist.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">

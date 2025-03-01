@@ -13,11 +13,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/Providers/SupabaseProvider";
+import Image from "next/image";
 
 const AuthTabs = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [fullName, setFullName] = useState<string>("")
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -29,14 +29,14 @@ const AuthTabs = () => {
   const [error, setError] = useState<string | null>(null);
 
 
-  const {session, signUpNewUser, signIn} = useAuth();
+  const { signUpNewUser, signIn} = useAuth();
 
 
   const handleSignUp = async(e: FormEvent)=>{
     e.preventDefault();
     setIsLoading(true);
     try{
-      const res = await signUpNewUser(fullName ,signUpEmail, signUpPassword);
+      const res = await signUpNewUser(signUpName ,signUpEmail, signUpPassword);
 
       if(res.success){
         router.push('/')
@@ -58,7 +58,8 @@ const AuthTabs = () => {
       if(res.success){
         router.push('/')
       }
-    } catch (err){
+    } catch {
+      
       setError("an error occured")
     } finally {
       setIsLoading(false)
@@ -74,7 +75,7 @@ const AuthTabs = () => {
         className="w-full py-6 relative"
         disabled={isLoading}
       >
-        <img
+        <Image
           src="/api/placeholder/20/20"
           alt="Google"
           className="absolute left-4 w-5 h-5"
