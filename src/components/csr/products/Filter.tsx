@@ -41,7 +41,11 @@ const Filter = ({
 
   return (
     <div className="w-full my-3">
+<<<<<<< HEAD
       {/* Mobile view - Hamburger menu for filters */}
+=======
+      {/* Mobile view */}
+>>>>>>> ae3a7d9ba4582617081670c5405cfff05b5bcb91
       <div className="md:hidden">
         <button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -120,7 +124,11 @@ const Filter = ({
         )}
       </div>
 
+<<<<<<< HEAD
       {/* Desktop view - Horizontal layout */}
+=======
+      {/* Desktop view */}
+>>>>>>> ae3a7d9ba4582617081670c5405cfff05b5bcb91
       <div className="hidden md:flex md:flex-wrap lg:flex-nowrap lg:justify-center gap-2 ">
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm whitespace-nowrap">
