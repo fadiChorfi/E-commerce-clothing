@@ -9,11 +9,14 @@ import {
   User,
   AlertCircle,
   Key,
+  ArrowRight,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/Providers/SupabaseProvider";
 import Image from "next/image";
+import Link from "next/link";
+import supabase from "@/supabase/client";
 
 const AuthTabs = () => {
   const router = useRouter();
@@ -28,44 +31,40 @@ const AuthTabs = () => {
 
   const [error, setError] = useState<string | null>(null);
 
+  const { signUpNewUser, signIn } = useAuth();
 
-  const { signUpNewUser, signIn} = useAuth();
-
-
-  const handleSignUp = async(e: FormEvent)=>{
+  const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try{
-      const res = await signUpNewUser(signUpName ,signUpEmail, signUpPassword);
+    try {
+      const res = await signUpNewUser(signUpName, signUpEmail, signUpPassword);
 
-      if(res.success){
-        router.push('/')
+      if (res.success) {
+        router.push("/");
       }
-    } catch (err){
-      setError("an error occured")
-      console.error(err)
+    } catch (err) {
+      setError("an error occured");
+      console.error(err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const handleSignIn = async(e: FormEvent)=>{
+  const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try{
+    try {
       const res = await signIn(loginEmail, loginPassword);
 
-      if(res.success){
-        router.push('/')
+      if (res.success) {
+        router.push("/");
       }
     } catch {
-      
-      setError("an error occured")
+      setError("an error occured");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
+  };
 
   const SocialAuth = () => (
     <div className="space-y-4">
@@ -73,11 +72,18 @@ const AuthTabs = () => {
         type="button"
         variant="outline"
         className="w-full py-6 relative"
+        onClick={() =>
+          supabase.auth.signInWithOAuth({
+            provider: "google",
+          })
+        }
         disabled={isLoading}
       >
         <Image
           src="/api/placeholder/20/20"
           alt="Google"
+          width={100}
+          height={100}
           className="absolute left-4 w-5 h-5"
         />
         <span className="mx-auto">Continue with Google</span>
@@ -197,6 +203,13 @@ const AuthTabs = () => {
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
               </form>
+              <Link
+                href="/"
+                className="w-full flex items-center justify-end  hover:cursor-pointer hover:text-blue-700"
+              >
+                <p className="text-sm">continue without loggin in</p>
+                <ArrowRight />
+              </Link>
             </div>
           </TabsContent>
 
