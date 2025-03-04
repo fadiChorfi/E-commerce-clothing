@@ -176,13 +176,14 @@ const ProductDetail = ({ product }: Props) => {
           <div className="space-y-4 sm:space-y-6 order-1">
             <div className="bg-white rounded-xl shadow-md overflow-hidden p-2 max-w-lg mx-auto">
               <div className="relative aspect-square overflow-hidden rounded-lg">
-                <Image
+                {/* <Image
                   alt={product.name}
                   src={product.image}
                   width={100}                  height={100}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   priority={false}
-                />
+                  
+                /> */}
               </div>
             </div>
 
