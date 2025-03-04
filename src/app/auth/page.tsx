@@ -85,6 +85,7 @@ const AuthTabs = () => {
           width={100}
           height={100}
           className="absolute left-4 w-5 h-5"
+          priority={false}
         />
         <span className="mx-auto">Continue with Google</span>
       </Button>

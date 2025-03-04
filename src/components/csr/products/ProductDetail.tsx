@@ -109,9 +109,7 @@ const ProductDetail = ({ product }: Props) => {
       selectedSize: selectedSize,
       quantity: counter,
     });
-    console.log(product)
-    console.log(selectedVariant.id)
-    console.log(counter)
+    
 
   };
 
@@ -127,13 +125,13 @@ const ProductDetail = ({ product }: Props) => {
   };
 
   const handlebuyBtn = () => {
-    if (!session?.user?.id) {
+   /*  if (!session?.user?.id) {
       alert('you are not logged')
       setTimeout(()=>{
         router.push("/auth");
       },2000)
       return { success: false, error: "User is not logged in." };
-    }
+    } */
     const selectedVariant = variants.find(
       (variant) =>
         variant.color === selectedColor && variant.size === selectedSize
@@ -183,6 +181,7 @@ const ProductDetail = ({ product }: Props) => {
                   src={product.image}
                   width={100}                  height={100}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                  priority={false}
                 />
               </div>
             </div>

@@ -16,18 +16,71 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType>({
   cart: [],
-  addToCart: async () => ({ success: false, error: undefined }),
+  addToCart: async () => ({ success: false, error: undefined  }),
   fetchCart: async () => ({ success: false, error: undefined }),
   removeFromCart: async () => ({ success: false, error: undefined }),
   isInCart: () => false,
   clearCart: async () => ({ success: false, error: undefined }),
 });
 
+
+  
 export const CartContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Wrap fetchCart in useCallback to provide a stable reference.
+
+  useEffect(()=>{
+    const localCart = window.localStorage.getItem('cart')
+    setCart(localCart ?  JSON.parse(localCart) : [] )
+  }, [session]);
+
+  useEffect(()=>{
+    if (!session?.user.id){
+        localStorage.setItem('cart', JSON.stringify(cart))
+        console.log(cart)
+    }
+  }, [session, cart]);
+
+  useEffect(()=>{
+    if (session?.user.id){
+        syncLocalCartToSupabase();
+        fetchCart();
+    }
+  }, [session])
+
+
+  const syncLocalCartToSupabase = async () => {
+    if (!session?.user?.id) return;
+    
+    const localCart = localStorage.getItem("cart");
+    if (!localCart) return;
+
+    const cartItems: CartItem[] = JSON.parse(localCart);
+
+    try {
+      const { error } = await supabase.from("cart_items").insert(
+        cartItems.map((item) => ({
+          user_id: session.user.id,
+          product_id: item.product.id,
+          variant_id: item.variant_id,
+          selectedColor: item.selectedColor,
+          selectedSize: item.selectedSize,
+          quantity: item.quantity,
+        }))
+      );
+
+      if (error) {
+        console.error("Error syncing cart:", error);
+      } else {
+        localStorage.removeItem("cart"); // Clear local cart after syncing
+      }
+    } catch (err) {
+      console.error("Unexpected error syncing cart:", err);
+    }
+  };
+
+
   const fetchCart = useCallback(async (): Promise<{ success: boolean; data?: CartItem[]; error?: string }> => {
     if (!session?.user?.id) {
       return { success: false, error: "User is not logged in." };
@@ -44,7 +97,6 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
         return { success: false, error: error.message };
       }
 
-      // Define the expected shape of a row returned from Supabase.
       type SupabaseCartItem = {
         user_id: string;
         product: Product;
@@ -82,6 +134,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
 
   const addToCart = async (item: CartItem): Promise<{ success: boolean; error?: string }> => {
     if (!session?.user?.id) {
+      
       alert("Sign in first");
       return { success: false, error: "User is not logged in." };
     }
@@ -90,7 +143,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
       return { success: false, error: "Item already in cart" };
     }
 
-    // Optimistically update the UI.
+  
     setCart((prevCart) => [...prevCart, item]);
 
     try {
