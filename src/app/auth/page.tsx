@@ -207,7 +207,6 @@ const AuthTabs = () => {
             </div>
           </TabsContent>
 
-          {/* Sign Up Tab */}
           <TabsContent value="signup">
             <div className="space-y-6">
               <div className="text-center">
@@ -317,7 +316,6 @@ const AuthTabs = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Error Message */}
         {error && (
           <div className="mt-4 rounded-md bg-red-50 p-4">
             <div className="flex">
