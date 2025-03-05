@@ -8,13 +8,13 @@ import {
   Github,
   User,
   AlertCircle,
-  Key,
+  LockKeyhole,
   ArrowRight,
 } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/Providers/SupabaseProvider";
-import Image from "next/image";
 import Link from "next/link";
 import supabase from "@/supabase/client";
 
@@ -31,7 +31,7 @@ const AuthTabs = () => {
 
   const [error, setError] = useState<string | null>(null);
 
-  const { signUpNewUser, signIn } = useAuth();
+  const { signUpNewUser, signIn, signInWithGitHub } = useAuth();
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
@@ -79,14 +79,7 @@ const AuthTabs = () => {
         }
         disabled={isLoading}
       >
-        <Image
-          src="/api/placeholder/20/20"
-          alt="Google"
-          width={100}
-          height={100}
-          className="absolute left-4 w-5 h-5"
-          priority={false}
-        />
+        <FcGoogle />
         <span className="mx-auto">Continue with Google</span>
       </Button>
 
@@ -94,6 +87,7 @@ const AuthTabs = () => {
         type="button"
         variant="outline"
         className="w-full py-6 relative"
+        onClick={()=>signInWithGitHub()}
         disabled={isLoading}
       >
         <Github className="absolute left-4 w-5 h-5" />
@@ -120,7 +114,6 @@ const AuthTabs = () => {
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
 
-          {/* Login Tab */}
           <TabsContent value="login">
             <div className="space-y-6">
               <div className="text-center">
@@ -167,7 +160,7 @@ const AuthTabs = () => {
                   </label>
                   <div className="mt-1 relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Key className="h-5 w-5 text-gray-400" />
+                      <LockKeyhole className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                       id="login-password"
@@ -286,7 +279,7 @@ const AuthTabs = () => {
                   </label>
                   <div className="mt-1 relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Eye className="h-5 w-5 text-gray-400" />
+                      <LockKeyhole className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                       id="sign-up-password"
@@ -302,15 +295,12 @@ const AuthTabs = () => {
                       type="button"
                       onClick={() => setShowSignUpPassword(!showSignUpPassword)}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      aria-label={
-                        showSignUpPassword ? "Hide password" : "Show password"
-                      }
                     >
-                      {showSignUpPassword ? (
+                       {showSignUpPassword ? (
                         <EyeOff className="h-5 w-5 text-gray-400" />
                       ) : (
                         <Eye className="h-5 w-5 text-gray-400" />
-                      )}
+                      )} 
                     </button>
                   </div>
                 </div>

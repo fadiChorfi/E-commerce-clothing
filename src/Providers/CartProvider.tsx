@@ -1,5 +1,4 @@
 "use client";
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./SupabaseProvider";
 import supabase from "@/supabase/client";
@@ -16,43 +15,32 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType>({
   cart: [],
-  addToCart: async () => ({ success: false, error: undefined  }),
+  addToCart: async () => ({ success: false, error: undefined }),
   fetchCart: async () => ({ success: false, error: undefined }),
   removeFromCart: async () => ({ success: false, error: undefined }),
   isInCart: () => false,
   clearCart: async () => ({ success: false, error: undefined }),
 });
 
-
-  
 export const CartContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
 
-
-  useEffect(()=>{
-    const localCart = window.localStorage.getItem('cart')
-    setCart(localCart ?  JSON.parse(localCart) : [] )
+  // Load cart from local storage on initial render
+  useEffect(() => {
+    const localCart = window.localStorage.getItem("cart");
+    setCart(localCart ? JSON.parse(localCart) : []);
   }, [session]);
 
-  useEffect(()=>{
-    if (!session?.user.id){
-        localStorage.setItem('cart', JSON.stringify(cart))
-        console.log(cart)
+  useEffect(() => {
+    if (!session?.user?.id) {
+      localStorage.setItem("cart", JSON.stringify(cart));
     }
   }, [session, cart]);
 
-  useEffect(()=>{
-    if (session?.user.id){
-        syncLocalCartToSupabase();
-        fetchCart();
-    }
-  }, [session])
-
-
-  const syncLocalCartToSupabase = async () => {
+  const syncLocalCartToSupabase = useCallback(async () => {
     if (!session?.user?.id) return;
-    
+
     const localCart = localStorage.getItem("cart");
     if (!localCart) return;
 
@@ -73,13 +61,12 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
       if (error) {
         console.error("Error syncing cart:", error);
       } else {
-        localStorage.removeItem("cart"); // Clear local cart after syncing
+        localStorage.removeItem("cart"); 
       }
     } catch (err) {
       console.error("Unexpected error syncing cart:", err);
     }
-  };
-
+  }, [session]);
 
   const fetchCart = useCallback(async (): Promise<{ success: boolean; data?: CartItem[]; error?: string }> => {
     if (!session?.user?.id) {
@@ -126,15 +113,13 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (session?.user?.id) {
+      syncLocalCartToSupabase();
       fetchCart();
-    } else {
-      setCart([]);
     }
-  }, [session, fetchCart]);
+  }, [session, syncLocalCartToSupabase, fetchCart]);
 
   const addToCart = async (item: CartItem): Promise<{ success: boolean; error?: string }> => {
     if (!session?.user?.id) {
-      
       alert("Sign in first");
       return { success: false, error: "User is not logged in." };
     }
@@ -143,7 +128,6 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
       return { success: false, error: "Item already in cart" };
     }
 
-  
     setCart((prevCart) => [...prevCart, item]);
 
     try {
@@ -157,7 +141,6 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
       });
 
       if (error) {
-        // Rollback the UI update if there is an error.
         setCart((prevCart) => prevCart.filter((p) => p.product.id !== item.product.id));
         console.error("Error adding to cart:", error);
         return { success: false, error: error.message };
@@ -176,10 +159,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
     }
 
     try {
-      const { error } = await supabase
-        .from("cart_items")
-        .delete()
-        .eq("user_id", session.user.id);
+      const { error } = await supabase.from("cart_items").delete().eq("user_id", session.user.id);
 
       if (error) {
         console.error("Error clearing cart:", error);
@@ -202,11 +182,7 @@ export const CartContextProvider = ({ children }: { children: React.ReactNode })
     setCart((prevCart) => prevCart.filter((p) => p.product.id !== itemID));
 
     try {
-      const { error } = await supabase
-        .from("cart_items")
-        .delete()
-        .eq("user_id", session.user.id)
-        .eq("product_id", itemID);
+      const { error } = await supabase.from("cart_items").delete().eq("user_id", session.user.id).eq("product_id", itemID);
 
       if (error) {
         console.error("Error removing from cart:", error);

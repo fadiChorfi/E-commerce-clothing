@@ -14,7 +14,6 @@ import {
   Package,
 } from "lucide-react";
 import { useBuy } from "@/Providers/checkoutProvider";
-import Image from "next/image";
 import { useAuth } from "@/Providers/SupabaseProvider";
 
 type Props = {
@@ -33,10 +32,8 @@ const ProductDetail = ({ product }: Props) => {
   const { addToBuyItems } = useBuy();
   const { session } = useAuth();
 
-  // Wrap variants in useMemo to ensure it's stable across renders
   const variants = useMemo(() => product.product_variants || [], [product.product_variants]);
   
-  // Use variants from above in these derived values
   const allColors = useMemo(() => 
     [...new Set(variants.map((variant) => variant.color))], 
     [variants]
@@ -125,13 +122,6 @@ const ProductDetail = ({ product }: Props) => {
   };
 
   const handlebuyBtn = () => {
-   /*  if (!session?.user?.id) {
-      alert('you are not logged')
-      setTimeout(()=>{
-        router.push("/auth");
-      },2000)
-      return { success: false, error: "User is not logged in." };
-    } */
     const selectedVariant = variants.find(
       (variant) =>
         variant.color === selectedColor && variant.size === selectedSize

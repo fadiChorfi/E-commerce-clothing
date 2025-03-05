@@ -34,7 +34,7 @@ const WishlistSheet = () => {
     };
     
     loadWishlist();
-  }, [session]);
+  }, [session, fetchWishlist]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
     await removeFromWishlist(productId);

@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 import { type ReactNode, createContext, useContext, useEffect, useState } from "react"
 import type { Session, User, AuthError } from "@supabase/supabase-js"
 
-// Assuming you have a client setup like this
+// Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
@@ -15,12 +15,13 @@ type AuthContextType = {
   signUpNewUser: (
     full_name: string,
     email: string,
-    password: string,
+    password: string
   ) => Promise<{ success: boolean; data?: Session | null; error?: AuthError | null }>
   signIn: (
     email: string,
-    password: string,
+    password: string
   ) => Promise<{ success: boolean; data?: Session | null; error?: AuthError | null }>
+  signInWithGitHub: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   signUpNewUser: async () => ({ success: false, error: null }),
   signIn: async () => ({ success: false, error: null }),
+  signInWithGitHub: async () => {},
   signOut: async () => {},
 })
 
@@ -68,6 +70,16 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     return { success: true, data: data.session }
   }
 
+  const signInWithGitHub = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+    })
+
+    if (error) {
+      console.error("GitHub Login Error:", error.message)
+    }
+  }
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (error) {
@@ -92,11 +104,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ session, user, signUpNewUser, signIn, signOut }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ session, user, signUpNewUser, signIn, signInWithGitHub, signOut }}>
+      {children}
+    </AuthContext.Provider>
   )
 }
 
 export const useAuth = () => {
   return useContext(AuthContext)
 }
-
