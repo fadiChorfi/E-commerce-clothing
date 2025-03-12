@@ -3,6 +3,7 @@ import { Product } from "@/types/types";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import WishlistButton from "./WishlistButton";
+import { Star } from "lucide-react";
 
 type Props = {
   product: Product;
@@ -10,7 +11,7 @@ type Props = {
 
 const ProductCard = ({ product }: Props) => {
   return (
-    <Card className="group h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1   overflow-hidden">
+    <Card className="group h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1   overflow-hidden rounded-lg">
       <div className="relative aspect-square overflow-hidden bg-gray-50">
         <Image
           src={product.image}
@@ -28,9 +29,20 @@ const ProductCard = ({ product }: Props) => {
             {product.name}
           </h3>
           <p className="text-xs text-gray-500">{product.category}</p>
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${
+                  i < Math.floor(3)
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+          </div>
           <div className="flex items-center justify-between">
             <p className="font-bold text-lg">${product.base_price}</p>
-            
           </div>
         </div>
       </CardContent>

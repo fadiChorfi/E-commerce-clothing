@@ -5,6 +5,9 @@ import Filter from "./Filter";
 import ProductListing from "./productListing";
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
+import HeroSection from "../section/HeroSection";
+import FeaturedProductsSection from "../section/FeaturedProductsSection";
+import NewsletterSection from "../section/NewsletterSection";
 
 type Props = {
   products: Product[];
@@ -45,7 +48,9 @@ const ClientWrapper = ({ products }: Props) => {
   return (
     <div>
       <Header/>
-      <div className="flex justify-center">
+      <HeroSection/>
+      <FeaturedProductsSection/>
+       <div className="flex justify-center">
         <Filter
           selectedCategory={selectedCategory}
           handleFilter={setSelectedCategory}
@@ -54,9 +59,10 @@ const ClientWrapper = ({ products }: Props) => {
           selectedGender ={selectedGender}
           handleGender={setSelectedGender}
         />
-      </div>
+      </div> 
       
       <ProductListing data={filteredProducts} />
+      <NewsletterSection/>
       <Footer/>
     </div>
   );

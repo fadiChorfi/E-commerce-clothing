@@ -28,19 +28,17 @@ const WishlistSheet = () => {
       setLoading(true);
       const { error } = await fetchWishlist();
       setLoading(false);
-       if (error) {
+      if (error) {
         setError(error || "Failed to load wishlist.");
-      } 
+      }
     };
-    
+
     loadWishlist();
   }, [session, fetchWishlist]);
 
   const handleRemoveFromWishlist = async (productId: string) => {
     await removeFromWishlist(productId);
   };
-
- 
 
   return (
     <Sheet>
@@ -60,13 +58,15 @@ const WishlistSheet = () => {
           </SheetDescription>
         </SheetHeader>
 
-        {loading ? (
+        {!session ? (
+          <p className="text-gray-800 font-semibold text-center mt-11">You are not logged</p>
+        ) : loading ? (
           <div className="flex items-center justify-center py-8">
             <p>Loading wishlist...</p>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-8 text-red-500">
-            <p></p>
+            <p>Error loading wishlist</p>
           </div>
         ) : wishlist.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -119,7 +119,6 @@ const WishlistSheet = () => {
                         >
                           <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500 transition-colors" />
                         </button>
-
                       </div>
                     </div>
 
