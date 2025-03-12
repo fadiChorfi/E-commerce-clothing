@@ -14,10 +14,10 @@ https://fashion-store-fady.vercel.app/
 - **User Authentication** – Login & Signup for personalized experience.
 
 ## Tech Stack
-- **Frontend:** Next.js, React, TypeScript, Redux Toolkit (for state management)
-- **Backend:** FastAPI (Python), PostgreSQL (Database)
+- **Frontend:** Next.js, React, TypeScript, shadcn
+- **Database:**PostgreSQL (supabase)
 - **Authentication:** Supabase Auth
-- **Deployment:** Vercel (Frontend), Railway/Fly.io (Backend)
+- **Deployment:** Vercel (Frontend)
 
 ## Installation
 ```sh
@@ -34,12 +34,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 
 # Start the development server
 npm run dev 
-```
-
-## Deployment
-- **Frontend:** Deploy using Vercel
-```sh
-vercel
 ```
 
 ## Future Improvements
