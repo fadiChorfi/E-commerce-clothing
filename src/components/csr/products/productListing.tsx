@@ -68,11 +68,6 @@ const ProductListing = ({ data }: Props) => {
       {data.length % 2 !== 0 && data.length > 2 && (
         <div key="sm-placeholder" className="hidden sm:block md:hidden" aria-hidden="true" />
       )}
-      {/* <div className="mt-12 text-center ">
-            <Button variant="outline" size="lg">
-              Load More Products
-            </Button>
-          </div> */}
     </motion.div>
   );
 };

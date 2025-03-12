@@ -45,11 +45,21 @@ const ClientWrapper = ({ products }: Props) => {
     setFilteredProducts(updatedProducts);
   }, [selectedCategory, selectedSort,selectedGender, products]);
 
+ 
+  const dataPro = Array.from(
+    new Map(
+      products
+        .filter((item) => item.badge === "Bestseller" || item.badge === "New Arrival")
+        .map(item => [item.id, item]) 
+    ).values()
+  );
+  
+
   return (
     <div>
       <Header/>
       <HeroSection/>
-      <FeaturedProductsSection/>
+      <FeaturedProductsSection  featuredProducts={dataPro}  />
        <div className="flex justify-center">
         <Filter
           selectedCategory={selectedCategory}

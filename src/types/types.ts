@@ -20,6 +20,7 @@ export interface Product {
   updated_at: Date;
   product_variants?: ProductVariant[];
   reviews?: Review[];
+  badge: string;
 }
 
 export interface ProductVariant {

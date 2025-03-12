@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types/types";
@@ -10,10 +9,8 @@ import {
   MinusCircle,
   PlusCircle,
   ShoppingCart,
-  CreditCard,
   Package,
 } from "lucide-react";
-import { useBuy } from "@/Providers/checkoutProvider";
 import { useAuth } from "@/Providers/SupabaseProvider";
 import Image from "next/image";
 
@@ -30,18 +27,20 @@ const ProductDetail = ({ product }: Props) => {
 
   const router = useRouter();
   const { addToCart } = useCart();
-  const { addToBuyItems } = useBuy();
   const { session } = useAuth();
 
-  const variants = useMemo(() => product.product_variants || [], [product.product_variants]);
-  
-  const allColors = useMemo(() => 
-    [...new Set(variants.map((variant) => variant.color))], 
+  const variants = useMemo(
+    () => product.product_variants || [],
+    [product.product_variants]
+  );
+
+  const allColors = useMemo(
+    () => [...new Set(variants.map((variant) => variant.color))],
     [variants]
   );
-  
-  const allSizes = useMemo(() => 
-    [...new Set(variants.map((variant) => variant.size))], 
+
+  const allSizes = useMemo(
+    () => [...new Set(variants.map((variant) => variant.size))],
     [variants]
   );
 
@@ -84,31 +83,30 @@ const ProductDetail = ({ product }: Props) => {
 
   const handleAddToCart = () => {
     if (!session?.user?.id) {
-      alert('you are not logged')
-      setTimeout(()=>{
+      alert("you are not logged");
+      setTimeout(() => {
         router.push("/auth");
-      },3000)
+      }, 3000);
       return { success: false, error: "User is not logged in." };
     }
     const selectedVariant = variants.find(
-      (variant) => variant.color === selectedColor && variant.size === selectedSize
+      (variant) =>
+        variant.color === selectedColor && variant.size === selectedSize
     );
-  
+
     if (!selectedVariant) {
       alert("Please select a valid color and size.");
       return;
     }
-  
+
     addToCart({
-      user_id: session.user.id, 
+      user_id: session.user.id,
       product: product,
       variant_id: selectedVariant.id,
       selectedColor: selectedColor,
       selectedSize: selectedSize,
       quantity: counter,
     });
-    
-
   };
 
   const handleAddQuantity = () => {
@@ -122,25 +120,7 @@ const ProductDetail = ({ product }: Props) => {
     setCounter(counter - 1);
   };
 
-  const handlebuyBtn = () => {
-    const selectedVariant = variants.find(
-      (variant) =>
-        variant.color === selectedColor && variant.size === selectedSize
-    );
-
-    if (!selectedVariant) {
-      alert("Please select a valid color and size.");
-      return;
-    }
-
-    addToBuyItems({
-      product: product,
-      quantity: counter,
-      variant: selectedVariant,
-    });
-
-    router.push("/protected/checkOut");
-  };
+ 
 
   const isValidSelection = () => {
     return variants.some(
@@ -167,15 +147,14 @@ const ProductDetail = ({ product }: Props) => {
           <div className="space-y-4 sm:space-y-6 order-1">
             <div className="bg-white rounded-xl shadow-md overflow-hidden p-2 max-w-lg mx-auto">
               <div className="relative aspect-square overflow-hidden rounded-lg">
-                 <Image
+                <Image
                   alt={product.name}
                   src={product.image}
-                  width={100}     
+                  width={100}
                   height={100}
                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   priority={false}
-                  
-                /> 
+                />
               </div>
             </div>
 
@@ -208,9 +187,6 @@ const ProductDetail = ({ product }: Props) => {
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     In Stock
-                  </span>
-                  <span className="text-xs sm:text-sm text-gray-500">
-                    SKU: {product.id}
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
@@ -368,26 +344,16 @@ const ProductDetail = ({ product }: Props) => {
                   Please Select Size and Color
                 </button>
               ) : (
-                <>
-                  <button
-                    onClick={handleAddToCart}
-                    className="w-full bg-blue-700 text-white py-3 sm:py-4 rounded-lg hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base"
-                  >
-                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Add to Cart
-                  </button>
-                  <button
-                    onClick={handlebuyBtn}
-                    className="w-full bg-white text-gray-900 py-3 sm:py-4 rounded-lg border border-gray-900 hover:bg-gray-50 transition flex items-center justify-center gap-2 font-medium text-sm sm:text-base"
-                  >
-                    <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Buy Now
-                  </button>
-                </>
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full bg-blue-700 text-white py-3 sm:py-4 rounded-lg hover:bg-blue-800 transition shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base"
+                >
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  Add to Cart
+                </button>
               )}
             </div>
 
-            {/* Shipping Information */}
             <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-100">
               <p className="text-xs sm:text-sm text-blue-800">
                 <span className="font-medium">Free delivery</span> available on
@@ -395,7 +361,6 @@ const ProductDetail = ({ product }: Props) => {
               </p>
             </div>
 
-            {/* Product Features - Mobile version at the bottom */}
             <div className="sm:hidden bg-gray-50 rounded-lg p-4 shadow-sm">
               <h3 className="font-medium text-gray-800 mb-2 text-sm">
                 Product Features
