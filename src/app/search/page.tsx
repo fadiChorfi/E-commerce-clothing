@@ -1,3 +1,4 @@
+
 import SearchBar from "@/components/csr/header/headerContent/SearchBar";
 import { ProductResults } from "@/components/csr/products/ProductResults";
 import { Suspense } from "react";
@@ -13,7 +14,9 @@ export default async function SearchPage(props: {
         <SearchBar />
       </Suspense>
 
-      <ProductResults searchParams={searchParams} />
+      <Suspense>
+        <ProductResults searchParams={searchParams} />
+      </Suspense>
     </div>
   );
 }

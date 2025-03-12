@@ -1,6 +1,7 @@
 //app/page.tsx
 import ClientWrapper from "@/components/csr/products/ClientWrapper";
 import supabase from "@/supabase/client";
+import { Suspense } from "react";
 
 export default async function Home() {
   const { data, error } = await supabase.from("products").select("*");
@@ -16,10 +17,11 @@ export default async function Home() {
     );
   }
 
-  
   return (
     <>
-      <ClientWrapper products={data} />
+      <Suspense>
+        <ClientWrapper products={data} />
+      </Suspense>
     </>
   );
 }

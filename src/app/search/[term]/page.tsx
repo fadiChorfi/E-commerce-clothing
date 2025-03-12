@@ -5,7 +5,6 @@ export default async function SearchResultsPage(props: {
   params: Promise<{ term: string }>;
 }) {
   const params = await props.params;
-  // Get the search term from the URL path parameter
   const searchTerm = decodeURIComponent(params.term);
 
   return (

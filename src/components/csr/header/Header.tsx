@@ -4,6 +4,7 @@ import SearchBar from "./headerContent/SearchBar";
 import WishlistSheet from "./headerContent/WishlistSheet";
 import CartSheet from "./headerContent/CartSheet";
 import ProfileBtn from "./headerContent/ProfileBtn";
+import { Suspense } from "react";
 
 const Header = () => {
   return (
@@ -42,7 +43,9 @@ const Header = () => {
         </div>
 
         <div className="mt-2 md:hidden">
-          <SearchBar />
+          <Suspense>
+            <SearchBar />
+          </Suspense>
         </div>
       </nav>
     </header>
