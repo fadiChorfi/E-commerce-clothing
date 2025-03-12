@@ -1,23 +1,24 @@
-import SearchBar from "@/components/csr/header/headerContent/SearchBar"
+import SearchBar from "@/components/csr/header/headerContent/SearchBar";
+import { Suspense } from "react";
 
-
-export default async function SearchResultsPage(
-  props: {
-    params: Promise<{ term: string }>
-  }
-) {
+export default async function SearchResultsPage(props: {
+  params: Promise<{ term: string }>;
+}) {
   const params = await props.params;
   // Get the search term from the URL path parameter
-  const searchTerm = decodeURIComponent(params.term)
+  const searchTerm = decodeURIComponent(params.term);
 
   return (
     <div className="container mx-auto py-8 space-y-6">
       <h1 className="text-2xl font-bold">Product Search</h1>
-
-      <SearchBar />
+      <Suspense>
+        <SearchBar />
+      </Suspense>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">Results for: {searchTerm}</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          Results for: {searchTerm}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* This would be your actual product listing */}
           <div className="border rounded-lg p-4">
@@ -31,6 +32,5 @@ export default async function SearchResultsPage(
         </div>
       </div>
     </div>
-  )
+  );
 }
-
